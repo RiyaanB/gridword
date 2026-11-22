@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gridword — swipe words, beat the clock, race the bots</title>
+<meta name="description" content="Gridword is a fast word game: 90 seconds, a grid of letters, swipe through touching tiles to make words. Longer words score big. Play the Daily board or race labelled bots.">
+<meta name="theme-color" content="#16123a">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Gridword — 90-second swipe word game">
+<meta property="og:description" content="Swipe through touching letters to make words. Longer words score big. Daily board + race the bots.">
+<meta property="og:image" content="og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app" class="app">
+
+  <!-- ============ TITLE ============ -->
+  <section id="screen-title" class="screen screen-title active" aria-label="Main menu">
+    <div class="title-wrap">
+      <h1 class="logo" aria-label="Gridword">
+        <span class="logo-tiles" aria-hidden="true">
+          <span class="lt">G</span><span class="lt">R</span><span class="lt">I</span><span class="lt">D</span>
+          <span class="lt">W</span><span class="lt">O</span><span class="lt">R</span><span class="lt">D</span>
+          <svg class="logo-path" viewBox="0 0 400 200" preserveAspectRatio="none"><polyline points="50,50 150,50 250,50 350,50 350,150 250,150 150,150 50,150"/></svg>
+        </span>
+      </h1>
+      <p class="tagline">Swipe words. Beat the clock. Race the bots.</p>
+
+      <div class="menu">
+        <button class="btn btn-daily" id="btn-daily" data-key="D">
+          <span class="btn-ico" aria-hidden="true">📅</span>
+          <span class="btn-text"><b id="daily-title">Daily #1</b><small id="daily-sub">Same board for everyone · 90s</small></span>
+          <kbd class="hint-key">D</kbd>
+        </button>
+        <button class="btn btn-solo" id="btn-solo" data-key="S">
+          <span class="btn-ico" aria-hidden="true">⏱️</span>
+          <span class="btn-text"><b>Solo</b><small id="solo-sub">Fresh board · 90s · best 0</small></span>
+          <kbd class="hint-key">S</kbd>
+        </button>
+        <button class="btn btn-bots" id="btn-bots" data-key="B">
+          <span class="btn-ico" aria-hidden="true">🤖</span>
+          <span class="btn-text"><b>vs Bots</b><small id="bots-sub">Race 4 computer bots on one board</small></span>
+          <kbd class="hint-key">B</kbd>
+        </button>
+        <div class="size-row" role="radiogroup" aria-label="Board size for Solo and vs Bots">
+          <span class="size-label">Board</span>
+          <button class="seg" role="radio" data-size="4" aria-checked="true">4×4 · 90s</button>
+          <button class="seg" role="radio" data-size="5" aria-checked="false">5×5 · 120s</button>
+        </div>
+      </div>
+
+      <nav class="title-foot">
+        <button class="link-btn" id="btn-howto">How to play</button>
+        <button class="link-btn" id="btn-stats">Stats</button>
+        <a class="link-btn" href="../arcade/">More games →</a>
+      </nav>
+    </div>
+    <button class="icon-btn mute-btn corner" aria-label="Toggle sound" data-mute>🔊</button>
+  </section>
+
+  <!-- ============ GAME ============ -->
+  <section id="screen-game" class="screen screen-game" aria-label="Game">
+    <header class="hud">
+      <button class="icon-btn" id="btn-quit" aria-label="Pause / quit">❚❚</button>
+      <div class="hud-mid">
+        <div class="hud-mode" id="hud-mode">Solo</div>
+        <div class="timer" id="timer" aria-live="off">1:30</div>
+      </div>
+      <div class="hud-score"><span class="lbl">Score</span><span id="score" class="score-val">0</span></div>
+      <button class="icon-btn mute-btn" aria-label="Toggle sound" data-mute>🔊</button>
+      <div class="timebar"><div class="timebar-fill" id="timebar"></div></div>
+    </header>
+
+    <div class="game-body">
+      <div class="col-board">
+        <div class="word-line">
+          <div class="current-word" id="current-word" aria-live="polite"></div>
+          <div class="feedback" id="feedback"></div>
+        </div>
+        <div class="board-area" id="board-area">
+          <div class="board" id="board" role="group" aria-label="Letter grid — swipe across touching letters, or type">
+            <svg class="path-svg" id="path-svg" aria-hidden="true"><polyline id="path-line"/></svg>
+          </div>
+          <div class="countdown" id="countdown" hidden><span id="countdown-num">3</span></div>
+        </div>
+        <div class="board-tools">
+          <button class="tool-btn" id="btn-rotate" aria-label="Rotate board">↻ <span>Rotate</span></button>
+          <span class="type-hint">Type letters · <kbd>Enter</kbd> to submit</span>
+          <button class="tool-btn" id="btn-submit" aria-label="Submit word" hidden>✓ <span>Submit</span></button>
+        </div>
+      </div>
+      <aside class="col-side">
+        <div class="scoreboard" id="scoreboard" aria-label="Live scoreboard"></div>
+        <div class="found-panel">
+          <div class="found-head"><span>Your words</span><span class="found-count"><b id="found-count">0</b> <span id="found-total"></span></span></div>
+          <div class="found-progress" aria-hidden="true"><div id="found-bar"></div></div>
+          <div class="found-list" id="found-list"><p class="empty" id="found-empty">Swipe across touching letters to make a word.</p></div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="times-up" id="times-up" hidden><span>Time!</span></div>
+  </section>
+
+  <!-- ============ RESULTS ============ -->
+  <section id="screen-results" class="screen screen-results" aria-label="Results">
+    <div class="results-wrap">
+      <header class="res-head">
+        <div class="res-kicker" id="res-kicker">Time's up!</div>
+        <div class="res-score"><span id="res-score">0</span><small>pts</small></div>
+        <div class="res-line" id="res-line"></div>
+        <div class="res-badges" id="res-badges"></div>
+        <div class="res-par" id="res-par" hidden></div>
+      </header>
+
+      <div class="res-standings" id="res-standings"></div>
+
+      <div class="res-actions">
+        <button class="btn btn-primary" id="btn-share" hidden>📋 Share result</button>
+        <button class="btn btn-primary" id="btn-again">↻ Play again</button>
+        <button class="btn btn-ghost" id="btn-menu">Menu</button>
+      </div>
+
+      <div class="res-panels">
+        <div class="res-missed-card">
+          <h2 class="sec-title">Longest words you missed</h2>
+          <div class="missed-reveal" id="missed-reveal"></div>
+        </div>
+        <div class="res-board-card">
+          <div class="mini-board" id="mini-board"><svg class="path-svg" aria-hidden="true"><polyline/></svg></div>
+          <p class="mini-caption" id="mini-caption">Tap a word to see where it hides.</p>
+        </div>
+        <div class="res-words-card">
+          <div class="words-head">
+            <h2 class="sec-title">All words <small id="all-count"></small></h2>
+            <div class="tabs" role="tablist">
+              <button class="tab active" role="tab" data-filter="all" aria-selected="true">All</button>
+              <button class="tab" role="tab" data-filter="found" aria-selected="false">Found</button>
+              <button class="tab" role="tab" data-filter="missed" aria-selected="false">Missed</button>
+            </div>
+          </div>
+          <div class="legend" id="legend"></div>
+          <div class="all-words" id="all-words"></div>
+          <button class="link-btn" id="btn-obscure" hidden></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MODALS ============ -->
+  <div class="modal" id="modal-howto" hidden role="dialog" aria-modal="true" aria-labelledby="howto-title">
+    <div class="sheet howto">
+      <h2 id="howto-title">How to play</h2>
+      <div class="steps" id="howto-steps">
+        <div class="step active" data-step="0">
+          <div class="step-art art-swipe" aria-hidden="true">
+            <div class="mini-grid"><span>C</span><span>A</span><span>X</span><span>E</span><span>T</span><span>N</span><span>R</span><span>S</span><span>O</span></div>
+            <svg viewBox="0 0 150 150"><polyline points="25,25 75,25 75,75 75,125"/></svg>
+            <div class="finger"></div>
+            <div class="say">CATS ✓ +2</div>
+          </div>
+          <h3><span class="num">1</span> Swipe touching letters</h3>
+          <p>Drag across tiles that touch — sideways, up, down or diagonal — to spell a word. Let go to submit. Each tile once per word.</p>
+        </div>
+        <div class="step" data-step="1">
+          <div class="step-art art-points" aria-hidden="true" id="howto-points"></div>
+          <h3><span class="num">2</span> Longer words score big</h3>
+          <p>Words need 3+ letters. Every extra letter is worth much more — hunt for the long ones. On desktop you can just type and press Enter.</p>
+        </div>
+        <div class="step" data-step="2">
+          <div class="step-art art-modes" aria-hidden="true">
+            <div class="mode-pill">⏱️ 90 seconds</div>
+            <div class="mode-pill">📅 Daily board · share it</div>
+            <div class="mode-pill">🤖 Race labelled bots</div>
+          </div>
+          <h3><span class="num">3</span> Beat the clock</h3>
+          <p>You get 90 seconds. Play the Daily (same board for everyone, one try) or race computer bots live. At the end, see every word you missed.</p>
+        </div>
+      </div>
+      <div class="dots" id="howto-dots"><i class="on"></i><i></i><i></i></div>
+      <div class="sheet-actions">
+        <button class="btn btn-ghost" id="howto-skip">Skip</button>
+        <button class="btn btn-primary" id="howto-next">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modal-bots" hidden role="dialog" aria-modal="true" aria-labelledby="bots-title">
+    <div class="sheet">
+      <h2 id="bots-title">🤖 vs Bots</h2>
+      <p class="sheet-sub">Race computer-controlled bots on the same board. They're bots, not people — each has a fixed skill level.</p>
+      <div class="size-row" role="radiogroup" aria-label="Difficulty">
+        <span class="size-label">Level</span>
+        <button class="seg" role="radio" data-diff="easy">Easy</button>
+        <button class="seg" role="radio" data-diff="normal">Normal</button>
+        <button class="seg" role="radio" data-diff="hard">Hard</button>
+      </div>
+      <div class="size-row" role="radiogroup" aria-label="Number of bots">
+        <span class="size-label">Bots</span>
+        <button class="seg" role="radio" data-bots="3">3</button>
+        <button class="seg" role="radio" data-bots="4">4</button>
+        <button class="seg" role="radio" data-bots="5">5</button>
+      </div>
+      <ul class="bot-list" id="bot-list"></ul>
+      <p class="sheet-sub tiny" id="bot-hint"></p>
+      <div class="sheet-actions">
+        <button class="btn btn-ghost" data-close>Back</button>
+        <button class="btn btn-primary" id="bots-start">Start race</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modal-pause" hidden role="dialog" aria-modal="true" aria-labelledby="pause-title">
+    <div class="sheet small">
+      <h2 id="pause-title">Paused</h2>
+      <p class="sheet-sub" id="pause-sub">The clock is stopped.</p>
+      <div class="sheet-actions col">
+        <button class="btn btn-primary" id="pause-resume">▶ Resume</button>
+        <button class="btn btn-ghost" id="pause-quit">Quit to menu</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modal-stats" hidden role="dialog" aria-modal="true" aria-labelledby="stats-title">
+    <div class="sheet">
+      <h2 id="stats-title">Your stats</h2>
+      <div class="stats-grid" id="stats-grid"></div>
+      <p class="sheet-sub tiny">Stats are saved only on this device. Words: ENABLE + 12dicts word lists (public domain) · <a href="CREDITS.txt" target="_blank" rel="noopener">credits</a></p>
+      <div class="sheet-actions">
+        <button class="btn btn-primary" data-close>Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="loading" id="loading"><div class="spinner"></div><p>Loading dictionary…</p></div>
+</div>
+<noscript><p style="color:#fff;padding:2em;text-align:center">Gridword needs JavaScript to run.</p></noscript>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

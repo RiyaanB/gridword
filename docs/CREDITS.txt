@@ -1,0 +1,23 @@
+Gridword — credits
+==================
+
+Code, design, sounds and art: original to this project (MIT licensed, see LICENSE).
+All sound effects are synthesised live with the Web Audio API; no audio files.
+No external fonts, scripts, trackers or network requests are used at runtime.
+
+Word list
+---------
+docs/data/words.txt is built by tools/build-dict.mjs from:
+
+* ENABLE (Enhanced North American Benchmark LExicon) word list, "enable1.txt".
+  Placed in the public domain by its authors.
+  Copy used: https://raw.githubusercontent.com/dolph/dictionary/master/enable1.txt
+
+* 12dicts "2of12id.txt" by Alan Beale (Alt12Dicts package, packaged by Kevin Atkinson).
+  "All of these files have been explicitly placed in the Public Domain by Alan Beale."
+  Used only to flag which words are "common" (bot vocabulary + end-of-round reveal).
+  Copy used: https://raw.githubusercontent.com/en-wl/wordlist/master/alt12dicts/2of12id.txt
+
+Processing: words of 3–16 letters, a–z only; words with a 'q' not followed by 'u'
+removed (the board uses a single "Qu" tile); offensive words removed using the
+project's own blocklist (tools/blocklist.txt); front-coded for size.
