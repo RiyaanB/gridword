@@ -31,6 +31,7 @@ const errorCounts = {};
 for (const vp of VIEWPORTS) {
   console.log(`\n=== ${vp.name} ===`);
   const ctx = await browser.newContext({ ...vp.opts });
+  await ctx.route(/gc\.zgo\.at|goatcounter\.com/, (r) => r.fulfill({ status: 200, contentType: 'text/javascript', body: '' })); // analytics stubbed in tests
   await ctx.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: BASE });
   const page = await ctx.newPage();
   const errors = [];
@@ -215,6 +216,7 @@ for (const vp of VIEWPORTS) {
   if (!cdp) {
     // reloading mid-round must not grant a second try
     const ctx2 = await browser.newContext({ ...vp.opts });
+    await ctx2.route(/gc\.zgo\.at|goatcounter\.com/, (r) => r.fulfill({ status: 200, contentType: 'text/javascript', body: '' })); // analytics stubbed in tests
     const p2 = await ctx2.newPage();
     await p2.addInitScript(() => { if (!localStorage.getItem('gridword:v1')) localStorage.setItem('gridword:v1', JSON.stringify({ seenHowTo: true })); });
     await p2.goto(BASE + '?test');
